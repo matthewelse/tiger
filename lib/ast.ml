@@ -21,29 +21,29 @@ module Type_id =
     end)
     ()
 
-type decs = dec list
+type declarations = declaration list
 
-and dec =
-  | DType of type_dec
-  | DVar of var_dec
-  | DFunc of func_dec
+and declaration =
+  | DType of type_declaration
+  | DVariable of variable_declaration
+  | DFunction of function_declaration
 
-and type_dec = Type_id.t * type_
+and type_declaration = Type_id.t * type_desc
 
-and var_dec =
+and variable_declaration =
   { ident : Ident.t
   ; type_id : Type_id.t option
   ; expression : expression
   }
 
-and func_dec =
+and function_declaration =
   { ident : Ident.t
   ; fields : (Ident.t * Type_id.t) list
   ; return_type : Type_id.t option
   ; body : expression
   }
 
-and type_ =
+and type_desc =
   | TIdent of Type_id.t
   | TRecord of (Field_id.t * Type_id.t) list
   | TArray of Type_id.t
@@ -52,9 +52,9 @@ and expression =
   | ENil
   | ELvalue of lvalue
   | ESequence of expression list
-  | EConst of const
+  | ELiteral of literal
   | ENegative of expression
-  | EBinary of binop * expression * expression
+  | EBinary of binary_operator * expression * expression
   | ERecord of (Field_id.t * expression) list
   | EArray of
       { element_type : Type_id.t
@@ -74,12 +74,12 @@ and expression =
   | EFor of
       { ident : Ident.t
       ; lo : expression
-      ; hi : expression
+      ; hi : expression (** inclusive*)
       ; body : expression
       }
   | EBreak
   | ELet of
-      { decs : decs
+      { declarations : declarations
       ; exps : expression list
       }
 
@@ -88,21 +88,21 @@ and lvalue =
   | LDot of lvalue * Ident.t
   | LSubscript of lvalue * expression
 
-and const =
-  | CInt of string
-  | CString of string
+and literal =
+  | LInt of string
+  | LString of string
 
-and binop =
-  | Plus
-  | Minus
-  | Times
+and binary_operator =
+  | And
   | Divide
   | Equal
-  | NotEqual
-  | Gt
-  | Lt
   | Ge
+  | Gt
   | Le
-  | And
+  | Lt
+  | Minus
+  | NotEqual
   | Or
+  | Plus
+  | Times
 [@@deriving sexp_of]

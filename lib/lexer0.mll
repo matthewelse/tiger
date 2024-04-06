@@ -40,7 +40,6 @@ rule read =
   | ']'      { Rbracket }
   | '{'      { Lbrace }
   | '}'      { Rbrace }
-  | '?'      { QuestionMark }
   | ','      { Comma }
   | "let"    { Let }
   | "in"     { In }

@@ -2,8 +2,8 @@ open! Core
 
 let test str =
   let lexer = Lexing.from_string str in
-  let decs = Tiger.Parser.decs Tiger.Lexer.read lexer in
-  print_s ([%sexp_of: Tiger.Ast.decs] decs)
+  let decs = Tiger.Parser.declarations Tiger.Lexer.read lexer in
+  print_s ([%sexp_of: Tiger.Ast.declarations] decs)
 ;;
 
 let%expect_test _ =
@@ -15,29 +15,29 @@ let%expect_test _ =
   [%expect
     {|
     ((DType (a (TRecord ((x int)))))
-     (DVar ((ident x) (type_id ()) (expression ENil)))) |}];
+     (DVariable ((ident x) (type_id ()) (expression ENil)))) |}];
   test "function treeLeaves(t : tree) = nil";
   [%expect
     {|
-    ((DFunc
+    ((DFunction
       ((ident treeLeaves) (fields ((t tree))) (return_type ()) (body ENil)))) |}];
   test "function treeLeaves(t : tree) : asdf = nil";
   [%expect
     {|
-    ((DFunc
+    ((DFunction
       ((ident treeLeaves) (fields ((t tree))) (return_type (asdf)) (body ENil)))) |}];
   test "var x = 1 + 2 * 3";
   [%expect
     {|
-    ((DVar
+    ((DVariable
       ((ident x) (type_id ())
        (expression
-        (EBinary Plus (EConst (CInt 1))
-         (EBinary Times (EConst (CInt 2)) (EConst (CInt 3)))))))) |}];
+        (EBinary Plus (ELiteral (LInt 1))
+         (EBinary Times (ELiteral (LInt 2)) (ELiteral (LInt 3)))))))) |}];
   test "var x = (a = b) = c";
   [%expect
     {|
-    ((DVar
+    ((DVariable
       ((ident x) (type_id ())
        (expression
         (EBinary Equal
@@ -49,7 +49,7 @@ let%expect_test _ =
   test "var x = c * d / e";
   [%expect
     {|
-    ((DVar
+    ((DVariable
       ((ident x) (type_id ())
        (expression
         (EBinary Divide (EBinary Times (ELvalue (LIdent c)) (ELvalue (LIdent d)))
@@ -57,7 +57,7 @@ let%expect_test _ =
   test "var x = a + b - c * d / e";
   [%expect
     {|
-    ((DVar
+    ((DVariable
       ((ident x) (type_id ())
        (expression
         (EBinary Minus (EBinary Plus (ELvalue (LIdent a)) (ELvalue (LIdent b)))
@@ -67,7 +67,7 @@ let%expect_test _ =
   test "var x = a + b - c * d / e = f & g | h";
   [%expect
     {|
-    ((DVar
+    ((DVariable
       ((ident x) (type_id ())
        (expression
         (EBinary Or
@@ -84,14 +84,14 @@ let%expect_test _ =
   test "var x = { asdf = 1234, defg = 999 }";
   [%expect
     {|
-    ((DVar
+    ((DVariable
       ((ident x) (type_id ())
        (expression
-        (ERecord ((asdf (EConst (CInt 1234))) (defg (EConst (CInt 999))))))))) |}];
+        (ERecord ((asdf (ELiteral (LInt 1234))) (defg (ELiteral (LInt 999))))))))) |}];
   test "var x = { asdf = 1234 }";
   [%expect
     {|
-    ((DVar
+    ((DVariable
       ((ident x) (type_id ())
-       (expression (ERecord ((asdf (EConst (CInt 1234))))))))) |}]
+       (expression (ERecord ((asdf (ELiteral (LInt 1234))))))))) |}]
 ;;

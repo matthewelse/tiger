@@ -5,52 +5,49 @@ open Ast
 %token<string> Int    "int"
 %token<string> String "string"
 %token<string> Ident
-// %token Bang         "!"
+%token Ampersand    "&"
+%token Array        "array"
+%token Assign       ":="
+%token Break        "break"
 %token Colon        ":"
-%token Dot          "."
 %token Comma        ","
+%token Do           "do"
+%token Dot          "."
+%token Else         "else"
+%token End          "end"
+%token Equal        "="
+%token For          "for"
+%token Function     "function"
+%token Greater      ">"
+%token GreaterEqual ">="
+%token If           "if"
+%token In           "in"
+%token Lbrace       "{"
+%token Lbracket     "["
+%token Less         "<"
+%token LessEqual    "<="
+%token Let          "let"
+%token Lparen       "("
 %token Minus        "-"
+%token Nil          "nil"
+%token NotEqual     "<>"
+%token Of           "of"
+%token Pipe         "|"
 %token Plus         "+"
+%token Rbrace       "}"
+%token Rbracket     "]"
+%token Rparen       ")"
+%token Semicolon    ";"
 %token Slash        "/"
 %token Star         "*"
-%token Ampersand    "&"
-%token Pipe         "|"
-%token Lparen       "("
-%token Rparen       ")"
-%token Lbracket     "["
-%token Rbracket     "]"
-%token Lbrace       "{"
-%token Rbrace       "}"
-%token Semicolon    ";"
-%token QuestionMark "?"
-%token Let          "let"
-%token In           "in"
-%token If           "if"
 %token Then         "then"
-%token Else         "else"
-%token NotEqual     "<>"
-%token Equal        "="
-%token LessEqual    "<="
-%token GreaterEqual ">="
-%token Greater      ">"
-%token Less         "<"
-%token Assign       ":="
-%token Type         "type"
-%token Array        "array"
-%token Of           "of"
-%token Var          "var"
-%token Nil          "nil"
-%token While        "while"
-%token Do           "do"
-%token For          "for"
 %token To           "to"
-%token Break        "break"
-%token End          "end"
-%token Function     "function"
+%token Type         "type"
+%token Var          "var"
+%token While        "while"
 %token Eof
 
-// %nonassoc In
-
+%nonassoc In
 %nonassoc Else
 %nonassoc Of
 
@@ -60,27 +57,27 @@ open Ast
 %left Plus, Minus
 %left Star, Slash
 
-%start<Ast.decs> decs
+%start<Ast.declarations> declarations
 
 %%
 
-let decs := ~ = list(dec); Eof; <>
+let declarations := ~ = list(declaration); Eof; <>
 
-let dec :=
-  | ~ = type_dec; <DType>
-  | ~ = var_dec ; <DVar>
-  | ~ = func_dec; <DFunc>
+let declaration :=
+  | ~ = type_declaration;     <DType>
+  | ~ = variable_declaration; <DVariable>
+  | ~ = function_declaration; <DFunction>
 
 
 (* Global variable declarations *)
 
-let var_dec :=
+let variable_declaration :=
   | "var" ; ~ = ident; "="; ~ = expression; { {ident; type_id = None ; expression } }
   | "var" ; ~ = ident; ":"; ~ = type_id; "="; ~ = expression; { {ident; type_id = Some type_id; expression } }
 
 (* Function declarations *)
 
-let func_dec :=
+let function_declaration :=
   | "function"; ~ = ident; "("; fields = func_params; ")"; "=";
     body = expression;
     { { ident; fields; return_type = None; body } }
@@ -96,10 +93,10 @@ let func_param :=
 
 (* Type declarations *)
 
-let type_dec :=
-  | "type"; ~ = type_id; "="; ~ = type_; <>
+let type_declaration :=
+  | "type"; ~ = type_id; "="; ~ = type_desc; <>
 
-let type_ :=
+let type_desc :=
   | ~ = type_id;                 <TIdent>
   | "{"; ~ = record_fields; "}"; <TRecord>
   | "array"; "of"; ~ = type_id;  <TArray>
@@ -117,13 +114,13 @@ let expression :=
 
 let one_expression := 
   | "nil"; { ENil }
-  | ~ = const; <EConst>
+  | ~ = literal; <ELiteral>
   | "-"; ~ = expression; <ENegative>
   | e1 = expression; ~ = binop; e2 = expression; { EBinary (binop, e1, e2) }
   | "{"; ~ = separated_nonempty_list(",", expr_record_field); "}"; <ERecord>
   (* TODO: deal with the shift/reduce conflict between this rule and lvalue. *)
   | element_type = type_id; "["; size = expression; "]"; "of"; init = expression; 
-  { EArray { element_type; size; init } }
+    { EArray { element_type; size; init } }
   | ~ = lvalue; ":="; ~ = expression; <EAssign>
   | ~ = lvalue; <ELvalue>
   | "if"; cond = expression; "then"; then_ = expression; "else"; else_ = expression; { EIf { cond; then_; else_ = Some else_ } }
@@ -131,7 +128,7 @@ let one_expression :=
   | "while"; cond = expression; "do"; body = expression; { EWhile { cond; body } }
   | "for"; ~ = ident; ":="; lo = expression; "to"; hi = expression; "do"; body = expression; { EFor { ident; lo; hi; body } }
   | "break"; { EBreak }
-  | "let"; ~ = decs; "in"; exps = separated_list(";", expression); "end"; { ELet { decs; exps } }
+  | "let"; ~ = declarations; "in"; exps = separated_list(";", expression); "end"; { ELet { declarations; exps } }
 
 
 let expr_record_field :=
@@ -152,9 +149,9 @@ let binop ==
   | "*";  { Times }
 
 
-let const ==
-  | ~ = "int"; <CInt>
-  | ~ = "string"; <CString>
+let literal ==
+  | ~ = "int"; <LInt>
+  | ~ = "string"; <LString>
 
 (* Lvalues *)
 
