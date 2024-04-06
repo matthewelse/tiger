@@ -120,7 +120,7 @@ let one_expression :=
   | ~ = literal; <ELiteral>
   | "-"; ~ = expression; <ENegative>
   | e1 = expression; ~ = binop; e2 = expression; { EBinary (binop, e1, e2) }
-  | "{"; ~ = separated_nonempty_list(",", expr_record_field); "}"; <ERecord>
+  | record_type = type_id; "{"; ~ = separated_nonempty_list(",", expr_record_field); "}"; <ERecord>
   (* We need some redundant indexing rules to work around shift/reduce conflicts. *)
   | element_type = type_id; "["; size = expression; "]"; "of"; init = expression; 
     { EArray { element_type; size; init } }

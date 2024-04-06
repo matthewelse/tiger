@@ -55,7 +55,7 @@ and expression =
   | ELiteral of literal
   | ENegative of expression
   | EBinary of binary_operator * expression * expression
-  | ERecord of (Field_id.t * expression) list
+  | ERecord of Type_id.t * (Field_id.t * expression) list
   | EArray of
       { element_type : Type_id.t
       ; size : expression

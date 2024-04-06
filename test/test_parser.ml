@@ -1,8 +1,10 @@
 open! Core
 open! Helpers
 
-let%expect_test "asdf" = test_parser {| (row[r] := 1) |};
-  [%expect {|
+let%expect_test "asdf" =
+  test_parser {| (row[r] := 1) |};
+  [%expect
+    {|
     (ESequence ((
       EAssign (LSubscript (LIdent row) (ELvalue (LIdent r))) (ELiteral (LInt 1))))) |}]
 ;;
@@ -76,7 +78,10 @@ let%expect_test _ =
   Expect_test_helpers_core.require_does_raise [%here] (fun () ->
     test_parser "var x := (a = b = c");
   [%expect
-    {| ("Parser error while processing token" (error "after 'b' and before '='")) |}];
+    {|
+      ("Parser error while processing token"
+        (error    "after 'b' and before '='")
+        (position :1:20)) |}];
   test_parser "var x := c * d / e";
   [%expect
     {|
@@ -136,7 +141,7 @@ let%expect_test _ =
               (ELvalue (LIdent g)))
             (ELvalue (LIdent h))))))))
       (exps ((ESequence ())))) |}];
-  test_parser "var x := { asdf = 1234, defg = 999 }";
+  test_parser "var x := record { asdf = 1234, defg = 999 }";
   [%expect
     {|
     (ELet
@@ -145,11 +150,11 @@ let%expect_test _ =
           (ident x)
           (type_id ())
           (expression (
-            ERecord (
+            ERecord record (
               (asdf (ELiteral (LInt 1234)))
               (defg (ELiteral (LInt 999))))))))))
       (exps ((ESequence ())))) |}];
-  test_parser "var x := { asdf = 1234 }";
+  test_parser "var x := record { asdf = 1234 }";
   [%expect
     {|
     (ELet
@@ -157,7 +162,7 @@ let%expect_test _ =
         DVariable (
           (ident x)
           (type_id ())
-          (expression (ERecord ((asdf (ELiteral (LInt 1234))))))))))
+          (expression (ERecord record ((asdf (ELiteral (LInt 1234))))))))))
       (exps ((ESequence ())))) |}];
   test_parser "var diag1 := intArray [N+N-1] of 0";
   [%expect
@@ -203,7 +208,8 @@ let%expect_test _ =
           (expression (ECall (func print) (args ((ELiteral (LString asdf))))))))))
       (exps ((ESequence ())))) |}];
   test_parser "var x := col[i]";
-  [%expect{|
+  [%expect
+    {|
     (ELet
       (declarations ((
         DVariable (
@@ -212,7 +218,8 @@ let%expect_test _ =
           (expression (ELvalue (LSubscript (LIdent col) (ELvalue (LIdent i)))))))))
       (exps ((ESequence ())))) |}];
   test_parser "var x := col[i]=j";
-  [%expect{|
+  [%expect
+    {|
     (ELet
       (declarations ((
         DVariable (
@@ -224,7 +231,8 @@ let%expect_test _ =
             (ELvalue (LIdent j))))))))
       (exps ((ESequence ())))) |}];
   test_parser "var x := print(if col[i]=j then \" O\" else \" .\")";
-  [%expect{|
+  [%expect
+    {|
     (ELet
       (declarations ((
         DVariable (

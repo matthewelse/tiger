@@ -14,7 +14,7 @@ let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let atom = [ '0'-'9' '_' ]+
-let string = "\"" ['a'-'z' 'A'-'Z' '0'-'9' '_' ' ' '\\' '.']* "\""
+let string = "\"" ['a'-'z' 'A'-'Z' '0'-'9' '_' ' ' '\\' '.' '-']* "\""
 
 rule read =
   parse
