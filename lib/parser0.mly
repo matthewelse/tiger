@@ -47,7 +47,6 @@ open Ast
 %token While        "while"
 %token Eof
 
-%nonassoc In
 %nonassoc Else
 %nonassoc Of
 
@@ -57,11 +56,15 @@ open Ast
 %left Plus, Minus
 %left Star, Slash
 
-%start<Ast.declarations> declarations
+%start<Ast.expression> program 
 
 %%
 
-let declarations := ~ = list(declaration); Eof; <>
+let program := ~ = expression; Eof; <>
+
+(* Declarations *)
+
+let declarations == list(declaration)
 
 let declaration :=
   | ~ = type_declaration;     <DType>
@@ -71,13 +74,13 @@ let declaration :=
 
 (* Global variable declarations *)
 
-let variable_declaration :=
-  | "var" ; ~ = ident; "="; ~ = expression; { {ident; type_id = None ; expression } }
-  | "var" ; ~ = ident; ":"; ~ = type_id; "="; ~ = expression; { {ident; type_id = Some type_id; expression } }
+let variable_declaration ==
+  | "var" ; ~ = ident; ":="; ~ = expression; { {ident; type_id = None ; expression } }
+  | "var" ; ~ = ident; ":"; ~ = type_id; ":="; ~ = expression; { {ident; type_id = Some type_id; expression } }
 
 (* Function declarations *)
 
-let function_declaration :=
+let function_declaration ==
   | "function"; ~ = ident; "("; fields = func_params; ")"; "=";
     body = expression;
     { { ident; fields; return_type = None; body } }
@@ -86,14 +89,14 @@ let function_declaration :=
     { { ident; fields; return_type = Some return_type; body } }
 
 
-let func_params == separated_nonempty_list(",", func_param)
+let func_params == separated_list(",", func_param)
 
 let func_param :=
   | ~ = ident; ":"; ~ = type_id; <>
 
 (* Type declarations *)
 
-let type_declaration :=
+let type_declaration ==
   | "type"; ~ = type_id; "="; ~ = type_desc; <>
 
 let type_desc :=
@@ -118,17 +121,21 @@ let one_expression :=
   | "-"; ~ = expression; <ENegative>
   | e1 = expression; ~ = binop; e2 = expression; { EBinary (binop, e1, e2) }
   | "{"; ~ = separated_nonempty_list(",", expr_record_field); "}"; <ERecord>
-  (* TODO: deal with the shift/reduce conflict between this rule and lvalue. *)
+  (* We need some redundant indexing rules to work around shift/reduce conflicts. *)
   | element_type = type_id; "["; size = expression; "]"; "of"; init = expression; 
     { EArray { element_type; size; init } }
-  | ~ = lvalue; ":="; ~ = expression; <EAssign>
+  | ~ = ident; "["; size = expression; "]"; ":="; ~ = expression; { EAssign (LSubscript (LIdent ident, size), expression) } 
+  | ~ = ident; "["; size = expression; "]"; { ELvalue (LSubscript (LIdent ident, size)) } 
+  (* Regular lvalue rules. *)
   | ~ = lvalue; <ELvalue>
+  | ~ = lvalue; ":="; ~ = expression; <EAssign>
   | "if"; cond = expression; "then"; then_ = expression; "else"; else_ = expression; { EIf { cond; then_; else_ = Some else_ } }
   | "if"; cond = expression; "then"; then_ = expression; { EIf { cond; then_; else_ = None } }
   | "while"; cond = expression; "do"; body = expression; { EWhile { cond; body } }
   | "for"; ~ = ident; ":="; lo = expression; "to"; hi = expression; "do"; body = expression; { EFor { ident; lo; hi; body } }
   | "break"; { EBreak }
   | "let"; ~ = declarations; "in"; exps = separated_list(";", expression); "end"; { ELet { declarations; exps } }
+  | func = ident; "("; args = separated_list(",", expression); ")"; { ECall { func; args } }
 
 
 let expr_record_field :=

@@ -82,6 +82,10 @@ and expression =
       { declarations : declarations
       ; exps : expression list
       }
+  | ECall of
+      { func : Ident.t
+      ; args : expression list
+      }
 
 and lvalue =
   | LIdent of Ident.t
