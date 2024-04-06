@@ -1,0 +1,6 @@
+(library
+ (name test_tiger)
+ (libraries core expect_test_helpers_core tiger)
+ (inline_tests)
+ (preprocess
+  (pps ppx_jane)))

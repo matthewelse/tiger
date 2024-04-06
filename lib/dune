@@ -1,0 +1,13 @@
+(library
+ (name tiger)
+ (libraries core)
+ (preprocess
+  (pps ppx_jane)))
+
+(ocamllex
+ (modules lexer0))
+
+(menhir
+ (modules parser0)
+ ; (flags (--strict))
+ (explain true))
