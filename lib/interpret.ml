@@ -1,6 +1,8 @@
 open! Core
 
-type native_function = Print [@@deriving sexp_of]
+module Native_function = struct
+  type t = Print [@@deriving sexp_of]
+end
 
 module Value = struct
   type t =
@@ -11,7 +13,7 @@ module Value = struct
     | Record of t ref Ast.Field_id.Map.t
     | Function of Ast.Ident.t list * Ast.Expression.t
     | Array of t array
-    | Native of native_function
+    | Native of Native_function.t
   [@@deriving sexp_of]
 
   let int_exn t =
