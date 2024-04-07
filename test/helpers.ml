@@ -44,5 +44,5 @@ let test_lexer str =
 let test_interpreter str =
   let expr = parse str in
   let value = Tiger.Interpret.run expr in
-  print_s [%sexp (value : Tiger.Interpret.value)]
+  print_s [%sexp (value : Tiger.Interpret.Value.t)]
 ;;
