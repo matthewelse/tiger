@@ -45,6 +45,8 @@ let unescape =
   String.Escaping.unescape_gen_exn ~escapeworthy_map ~escape_char:'\\' |> Staged.unstage
 ;;
 
+exception Break
+
 let rec interpret (env : env) (expr : Ast.Expression.t) : value =
   match expr with
   | Let { declarations; exps } ->
@@ -63,9 +65,7 @@ let rec interpret (env : env) (expr : Ast.Expression.t) : value =
     in
     List.fold exps ~init:Unit ~f:(fun _ exp -> interpret env exp)
   | Nil -> Nil
-  | Break ->
-    (* CR melse: [raise Break] *)
-    failwith "Not supported: EBreak."
+  | Break -> raise_notrace Break
   | Lvalue l ->
     let lvalue, _ = lvalue env l in
     lvalue ()
@@ -119,15 +119,29 @@ let rec interpret (env : env) (expr : Ast.Expression.t) : value =
       match else_ with
       | None -> Unit
       | Some else_ -> interpret env else_)
-  | While _ -> failwith "EWhile not supported"
+  | While { cond; body } ->
+    (try
+       while
+         let cond = interpret env cond in
+         int_exn cond <> 0
+       do
+         let (_ : value) = interpret env body in
+         ()
+       done
+     with
+     | Break -> ());
+    Unit
   | For { ident; lo; hi; body } ->
     let lo = interpret env lo |> int_exn in
     let hi = interpret env hi |> int_exn in
-    for i = lo to hi do
-      let env' = Map.set env ~key:ident ~data:(ref (Int i)) in
-      let (_ : value) = interpret env' body in
-      ()
-    done;
+    (try
+       for i = lo to hi do
+         let env' = Map.set env ~key:ident ~data:(ref (Int i)) in
+         let (_ : value) = interpret env' body in
+         ()
+       done
+     with
+     | Break -> ());
     Unit
   | Call { func; args } ->
     (match !(Map.find_exn env func) with
