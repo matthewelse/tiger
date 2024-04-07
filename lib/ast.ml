@@ -74,7 +74,7 @@ and expression =
   | EFor of
       { ident : Ident.t
       ; lo : expression
-      ; hi : expression (** inclusive*)
+      ; hi : expression (** inclusive *)
       ; body : expression
       }
   | EBreak
