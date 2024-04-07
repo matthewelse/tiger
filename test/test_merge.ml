@@ -71,7 +71,7 @@ let%expect_test "can parse" =
           (expression (ECall (func getchar) (args ())))))
         (DFunction (
           (ident readint)
-          (fields ((any any)))
+          (args ((any any)))
           (return_type (int))
           (body (
             ELet
@@ -79,7 +79,7 @@ let%expect_test "can parse" =
               (DVariable ((ident i) (type_id ()) (expression (ELiteral (LInt 0)))))
               (DFunction (
                 (ident isdigit)
-                (fields ((s string)))
+                (args ((s string)))
                 (return_type (int))
                 (body (
                   EBinary And
@@ -125,7 +125,7 @@ let%expect_test "can parse" =
               (rest  list)))))
         (DFunction (
           (ident readlist)
-          (fields ())
+          (args ())
           (return_type (list))
           (body (
             ELet
@@ -150,7 +150,7 @@ let%expect_test "can parse" =
                   (EAssign (LIdent buffer) (ECall (func getchar) (args ()))) ENil)))))))))))
         (DFunction (
           (ident merge)
-          (fields (
+          (args (
             (a list)
             (b list)))
           (return_type (list))
@@ -186,14 +186,14 @@ let%expect_test "can parse" =
                         (ELvalue (LIdent a)) (ELvalue (LDot (LIdent b) rest))))))))))))))))))))
         (DFunction (
           (ident printint)
-          (fields ((i int)))
+          (args ((i int)))
           (return_type ())
           (body (
             ELet
             (declarations ((
               DFunction (
                 (ident f)
-                (fields ((i int)))
+                (args ((i int)))
                 (return_type ())
                 (body (
                   EIf
@@ -242,7 +242,7 @@ let%expect_test "can parse" =
                 (else_ ((ECall (func print) (args ((ELiteral (LString 0)))))))))))))))))
         (DFunction (
           (ident printlist)
-          (fields ((l list)))
+          (args ((l list)))
           (return_type ())
           (body (
             EIf

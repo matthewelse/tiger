@@ -1,6 +1,6 @@
 open! Core
 
-let test_parser str =
+let parse str =
   let lexbuf = Lexing.from_string str in
   let buffer, lex = MenhirLib.ErrorReports.wrap Tiger.Lexer.read in
   let expr =
@@ -19,7 +19,11 @@ let test_parser str =
             (error : string)
             (position : Source_code_position.t)]
   in
-  Expect_test_helpers_core.print_s ([%sexp_of: Tiger.Ast.expression] expr)
+  expr
+;;
+
+let test_parser str =
+  Expect_test_helpers_core.print_s ([%sexp_of: Tiger.Ast.expression] (parse str))
 ;;
 
 let test_lexer str =
@@ -35,4 +39,10 @@ let test_lexer str =
     ()
   done;
   Expect_test_helpers_core.print_s ([%sexp_of: Tiger.Token.token Queue.t] tokens)
+;;
+
+let test_interpreter str =
+  let expr = parse str in
+  let value = Tiger.Interpret.run expr in
+  print_s [%sexp (value : Tiger.Interpret.value)]
 ;;

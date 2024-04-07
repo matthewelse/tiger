@@ -81,12 +81,12 @@ let variable_declaration ==
 (* Function declarations *)
 
 let function_declaration ==
-  | "function"; ~ = ident; "("; fields = func_params; ")"; "=";
+  | "function"; ~ = ident; "("; args = func_params; ")"; "=";
     body = expression;
-    { { ident; fields; return_type = None; body } }
-  | "function"; ~ = ident; "("; fields = func_params; ")"; ":"; return_type = type_id; "=";
+    { { ident; args; return_type = None; body } }
+  | "function"; ~ = ident; "("; args = func_params; ")"; ":"; return_type = type_id; "=";
     body = expression;
-    { { ident; fields; return_type = Some return_type; body } }
+    { { ident; args; return_type = Some return_type; body } }
 
 
 let func_params == separated_list(",", func_param)
@@ -164,7 +164,7 @@ let literal ==
 
 let lvalue :=
   | ~ = ident; <LIdent> 
-  | ~ = lvalue; "."; ~ = ident; <LDot>
+  | ~ = lvalue; "."; ~ = field_id; <LDot>
   | ~ = lvalue; "["; ~ = expression; "]"; <LSubscript>
 
 (* Identifiers *)

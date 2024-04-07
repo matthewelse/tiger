@@ -38,7 +38,7 @@ and variable_declaration =
 
 and function_declaration =
   { ident : Ident.t
-  ; fields : (Ident.t * Type_id.t) list
+  ; args : (Ident.t * Type_id.t) list
   ; return_type : Type_id.t option
   ; body : expression
   }
@@ -89,7 +89,7 @@ and expression =
 
 and lvalue =
   | LIdent of Ident.t
-  | LDot of lvalue * Ident.t
+  | LDot of lvalue * Field_id.t
   | LSubscript of lvalue * expression
 
 and literal =

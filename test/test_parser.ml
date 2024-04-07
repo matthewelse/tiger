@@ -34,7 +34,7 @@ let%expect_test _ =
     (ELet
       (declarations ((
         DFunction (
-          (ident treeLeaves) (fields ((t tree))) (return_type ()) (body ENil)))))
+          (ident treeLeaves) (args ((t tree))) (return_type ()) (body ENil)))))
       (exps ((ESequence ())))) |}];
   test_parser "function treeLeaves(t : tree) : asdf = nil";
   [%expect
@@ -42,7 +42,7 @@ let%expect_test _ =
     (ELet
       (declarations ((
         DFunction (
-          (ident treeLeaves) (fields ((t tree))) (return_type (asdf)) (body ENil)))))
+          (ident treeLeaves) (args ((t tree))) (return_type (asdf)) (body ENil)))))
       (exps ((ESequence ())))) |}];
   test_parser "var x := 1 + 2 * 3";
   [%expect
