@@ -1,5 +1,6 @@
 %{
 open Ast
+open Ast.Expression
 %}
 
 %token<string> Int    "int"
@@ -56,7 +57,7 @@ open Ast
 %left Plus, Minus
 %left Star, Slash
 
-%start<Ast.expression> program 
+%start<Ast.Expression.t> program 
 
 %%
 
@@ -67,26 +68,26 @@ let program := ~ = expression; Eof; <>
 let declarations == list(declaration)
 
 let declaration :=
-  | ~ = type_declaration;     <DType>
-  | ~ = variable_declaration; <DVariable>
-  | ~ = function_declaration; <DFunction>
+  | ~ = type_declaration;     <Declaration.Type>
+  | ~ = variable_declaration; <Declaration.Variable>
+  | ~ = function_declaration; <Declaration.Function>
 
 
 (* Global variable declarations *)
 
 let variable_declaration ==
-  | "var" ; ~ = ident; ":="; ~ = expression; { {ident; type_id = None ; expression } }
-  | "var" ; ~ = ident; ":"; ~ = type_id; ":="; ~ = expression; { {ident; type_id = Some type_id; expression } }
+  | "var" ; ~ = ident; ":="; ~ = expression; { {Variable_declaration.ident; type_id = None ; expression } }
+  | "var" ; ~ = ident; ":"; ~ = type_id; ":="; ~ = expression; { {Variable_declaration.ident; type_id = Some type_id; expression } }
 
 (* Function declarations *)
 
 let function_declaration ==
   | "function"; ~ = ident; "("; args = func_params; ")"; "=";
     body = expression;
-    { { ident; args; return_type = None; body } }
+    { { Function_declaration.ident; args; return_type = None; body } }
   | "function"; ~ = ident; "("; args = func_params; ")"; ":"; return_type = type_id; "=";
     body = expression;
-    { { ident; args; return_type = Some return_type; body } }
+    { { Function_declaration.ident; args; return_type = Some return_type; body } }
 
 
 let func_params == separated_list(",", func_param)
@@ -97,12 +98,12 @@ let func_param :=
 (* Type declarations *)
 
 let type_declaration ==
-  | "type"; ~ = type_id; "="; ~ = type_desc; <>
+  | "type"; name = type_id; "="; desc = type_desc; { { Type_declaration.name; desc } }
 
 let type_desc :=
-  | ~ = type_id;                 <TIdent>
-  | "{"; ~ = record_fields; "}"; <TRecord>
-  | "array"; "of"; ~ = type_id;  <TArray>
+  | ~ = type_id;                 <Type_desc.Alias>
+  | "{"; ~ = record_fields; "}"; <Type_desc.Record>
+  | "array"; "of"; ~ = type_id;  <Type_desc.Array>
 
 let record_fields == separated_nonempty_list(",", record_field)
 
@@ -113,59 +114,59 @@ let record_field :=
 
 let expression := 
   | ~ = one_expression; <>
-  | "("; ~ = separated_list(";", one_expression); ")"; <ESequence>
+  | "("; ~ = separated_list(";", one_expression); ")"; <Sequence>
 
 let one_expression := 
-  | "nil"; { ENil }
-  | ~ = literal; <ELiteral>
-  | "-"; ~ = expression; <ENegative>
-  | e1 = expression; ~ = binop; e2 = expression; { EBinary (binop, e1, e2) }
-  | record_type = type_id; "{"; ~ = separated_nonempty_list(",", expr_record_field); "}"; <ERecord>
+  | "nil"; { Nil }
+  | ~ = literal; <Literal>
+  | "-"; ~ = expression; <Negative>
+  | e1 = expression; ~ = binop; e2 = expression; { Binary (binop, e1, e2) }
+  | record_type = type_id; "{"; ~ = separated_nonempty_list(",", expr_record_field); "}"; <Record>
   (* We need some redundant indexing rules to work around shift/reduce conflicts. *)
   | element_type = type_id; "["; size = expression; "]"; "of"; init = expression; 
-    { EArray { element_type; size; init } }
-  | ~ = ident; "["; size = expression; "]"; ":="; ~ = expression; { EAssign (LSubscript (LIdent ident, size), expression) } 
-  | ~ = ident; "["; size = expression; "]"; { ELvalue (LSubscript (LIdent ident, size)) } 
+    { Array { element_type; size; init } }
+  | ~ = ident; "["; size = expression; "]"; ":="; ~ = expression; { Assign (Subscript (Ident ident, size), expression) } 
+  | ~ = ident; "["; size = expression; "]"; { Lvalue (Subscript (Ident ident, size)) } 
   (* Regular lvalue rules. *)
-  | ~ = lvalue; <ELvalue>
-  | ~ = lvalue; ":="; ~ = expression; <EAssign>
-  | "if"; cond = expression; "then"; then_ = expression; "else"; else_ = expression; { EIf { cond; then_; else_ = Some else_ } }
-  | "if"; cond = expression; "then"; then_ = expression; { EIf { cond; then_; else_ = None } }
-  | "while"; cond = expression; "do"; body = expression; { EWhile { cond; body } }
-  | "for"; ~ = ident; ":="; lo = expression; "to"; hi = expression; "do"; body = expression; { EFor { ident; lo; hi; body } }
-  | "break"; { EBreak }
-  | "let"; ~ = declarations; "in"; exps = separated_list(";", expression); "end"; { ELet { declarations; exps } }
-  | func = ident; "("; args = separated_list(",", expression); ")"; { ECall { func; args } }
+  | ~ = lvalue; <Lvalue>
+  | ~ = lvalue; ":="; ~ = expression; <Assign>
+  | "if"; cond = expression; "then"; then_ = expression; "else"; else_ = expression; { If { cond; then_; else_ = Some else_ } }
+  | "if"; cond = expression; "then"; then_ = expression; { If { cond; then_; else_ = None } }
+  | "while"; cond = expression; "do"; body = expression; { While { cond; body } }
+  | "for"; ~ = ident; ":="; lo = expression; "to"; hi = expression; "do"; body = expression; { For { ident; lo; hi; body } }
+  | "break"; { Break }
+  | "let"; ~ = declarations; "in"; exps = separated_list(";", expression); "end"; { Let { declarations; exps } }
+  | func = ident; "("; args = separated_list(",", expression); ")"; { Call { func; args } }
 
 
 let expr_record_field :=
   | ~ = field_id; "="; ~ = expression; <>
 
 let binop ==
-  | "|";  { Or }
-  | "&";  { And }
-  | "<="; { Le }
-  | ">="; { Ge }
-  | "<";  { Lt }
-  | ">";  { Gt }
-  | "<>"; { NotEqual }
-  | "=";  { Equal }
-  | "-";  { Minus }
-  | "+";  { Plus }
-  | "/";  { Divide }
-  | "*";  { Times }
+  | "|";  { Binary_operator.Or }
+  | "&";  { Binary_operator.And }
+  | "<="; { Binary_operator.Le }
+  | ">="; { Binary_operator.Ge }
+  | "<";  { Binary_operator.Lt }
+  | ">";  { Binary_operator.Gt }
+  | "<>"; { Binary_operator.NotEqual }
+  | "=";  { Binary_operator.Equal }
+  | "-";  { Binary_operator.Minus }
+  | "+";  { Binary_operator.Plus }
+  | "/";  { Binary_operator.Divide }
+  | "*";  { Binary_operator.Times }
 
 
 let literal ==
-  | ~ = "int"; <LInt>
-  | ~ = "string"; <LString>
+  | ~ = "int"   ; <Literal.Int>
+  | ~ = "string"; <Literal.String>
 
 (* Lvalues *)
 
 let lvalue :=
-  | ~ = ident; <LIdent> 
-  | ~ = lvalue; "."; ~ = field_id; <LDot>
-  | ~ = lvalue; "["; ~ = expression; "]"; <LSubscript>
+  | ~ = ident; <Ident> 
+  | ~ = lvalue; "."; ~ = field_id; <Dot>
+  | ~ = lvalue; "["; ~ = expression; "]"; <Subscript>
 
 (* Identifiers *)
 

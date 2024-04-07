@@ -5,8 +5,8 @@ let%expect_test "asdf" =
   test_parser {| (row[r] := 1) |};
   [%expect
     {|
-    (ESequence ((
-      EAssign (LSubscript (LIdent row) (ELvalue (LIdent r))) (ELiteral (LInt 1))))) |}]
+    (Sequence ((
+      Assign (Subscript (Ident row) (Lvalue (Ident r))) (Literal (Int 1))))) |}]
 ;;
 
 let test_parser s = test_parser [%string "let %{s} in () end"]
@@ -17,64 +17,64 @@ let%expect_test _ =
   test_parser "type a = { x : int }";
   [%expect
     {|
-    (ELet
-      (declarations ((DType (a (TRecord ((x int)))))))
-      (exps ((ESequence ())))) |}];
+    (Let
+      (declarations ((Type ((name a) (desc (Record ((x int))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "type a = { x : int }   var x := nil";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations (
-        (DType (a (TRecord ((x int)))))
-        (DVariable ((ident x) (type_id ()) (expression ENil)))))
-      (exps ((ESequence ())))) |}];
+        (Type ((name a) (desc (Record ((x int))))))
+        (Variable ((ident x) (type_id ()) (expression Nil)))))
+      (exps ((Sequence ())))) |}];
   test_parser "function treeLeaves(t : tree) = nil";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DFunction (
-          (ident treeLeaves) (args ((t tree))) (return_type ()) (body ENil)))))
-      (exps ((ESequence ())))) |}];
+        Function (
+          (ident treeLeaves) (args ((t tree))) (return_type ()) (body Nil)))))
+      (exps ((Sequence ())))) |}];
   test_parser "function treeLeaves(t : tree) : asdf = nil";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DFunction (
-          (ident treeLeaves) (args ((t tree))) (return_type (asdf)) (body ENil)))))
-      (exps ((ESequence ())))) |}];
+        Function (
+          (ident treeLeaves) (args ((t tree))) (return_type (asdf)) (body Nil)))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := 1 + 2 * 3";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            EBinary Plus
-            (ELiteral (LInt 1))
-            (EBinary Times
-              (ELiteral (LInt 2))
-              (ELiteral (LInt 3)))))))))
-      (exps ((ESequence ())))) |}];
+            Binary Plus
+            (Literal (Int 1))
+            (Binary Times
+              (Literal (Int 2))
+              (Literal (Int 3)))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := (a = b) = c";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            EBinary Equal
-            (ESequence ((
-              EBinary Equal
-              (ELvalue (LIdent a))
-              (ELvalue (LIdent b)))))
-            (ELvalue (LIdent c))))))))
-      (exps ((ESequence ())))) |}];
+            Binary Equal
+            (Sequence ((
+              Binary Equal
+              (Lvalue (Ident a))
+              (Lvalue (Ident b)))))
+            (Lvalue (Ident c))))))))
+      (exps ((Sequence ())))) |}];
   Expect_test_helpers_core.require_does_raise [%here] (fun () ->
     test_parser "var x := (a = b = c");
   [%expect
@@ -85,169 +85,169 @@ let%expect_test _ =
   test_parser "var x := c * d / e";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            EBinary Divide
-            (EBinary Times
-              (ELvalue (LIdent c))
-              (ELvalue (LIdent d)))
-            (ELvalue (LIdent e))))))))
-      (exps ((ESequence ())))) |}];
+            Binary Divide
+            (Binary Times
+              (Lvalue (Ident c))
+              (Lvalue (Ident d)))
+            (Lvalue (Ident e))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := a + b - c * d / e";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            EBinary Minus
-            (EBinary Plus
-              (ELvalue (LIdent a))
-              (ELvalue (LIdent b)))
-            (EBinary Divide
-              (EBinary Times
-                (ELvalue (LIdent c))
-                (ELvalue (LIdent d)))
-              (ELvalue (LIdent e)))))))))
-      (exps ((ESequence ())))) |}];
+            Binary Minus
+            (Binary Plus
+              (Lvalue (Ident a))
+              (Lvalue (Ident b)))
+            (Binary Divide
+              (Binary Times
+                (Lvalue (Ident c))
+                (Lvalue (Ident d)))
+              (Lvalue (Ident e)))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := a + b - c * d / e = f & g | h";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            EBinary Or
-            (EBinary And
-              (EBinary Equal
-                (EBinary Minus
-                  (EBinary Plus
-                    (ELvalue (LIdent a))
-                    (ELvalue (LIdent b)))
-                  (EBinary Divide
-                    (EBinary Times
-                      (ELvalue (LIdent c))
-                      (ELvalue (LIdent d)))
-                    (ELvalue (LIdent e))))
-                (ELvalue (LIdent f)))
-              (ELvalue (LIdent g)))
-            (ELvalue (LIdent h))))))))
-      (exps ((ESequence ())))) |}];
+            Binary Or
+            (Binary And
+              (Binary Equal
+                (Binary Minus
+                  (Binary Plus
+                    (Lvalue (Ident a))
+                    (Lvalue (Ident b)))
+                  (Binary Divide
+                    (Binary Times
+                      (Lvalue (Ident c))
+                      (Lvalue (Ident d)))
+                    (Lvalue (Ident e))))
+                (Lvalue (Ident f)))
+              (Lvalue (Ident g)))
+            (Lvalue (Ident h))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := record { asdf = 1234, defg = 999 }";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            ERecord record (
-              (asdf (ELiteral (LInt 1234)))
-              (defg (ELiteral (LInt 999))))))))))
-      (exps ((ESequence ())))) |}];
+            Record record (
+              (asdf (Literal (Int 1234)))
+              (defg (Literal (Int 999))))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := record { asdf = 1234 }";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
-          (expression (ERecord record ((asdf (ELiteral (LInt 1234))))))))))
-      (exps ((ESequence ())))) |}];
+          (expression (Record record ((asdf (Literal (Int 1234))))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var diag1 := intArray [N+N-1] of 0";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident diag1)
           (type_id ())
           (expression (
-            EArray
+            Array
             (element_type intArray)
             (size (
-              EBinary Minus
-              (EBinary Plus
-                (ELvalue (LIdent N))
-                (ELvalue (LIdent N)))
-              (ELiteral (LInt 1))))
-            (init (ELiteral (LInt 0)))))))))
-      (exps ((ESequence ())))) |}];
+              Binary Minus
+              (Binary Plus
+                (Lvalue (Ident N))
+                (Lvalue (Ident N)))
+              (Literal (Int 1))))
+            (init (Literal (Int 0)))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var diag1 := intArray [-1] of 0";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident diag1)
           (type_id ())
           (expression (
-            EArray
+            Array
             (element_type intArray)
-            (size (ENegative (ELiteral (LInt 1))))
-            (init (ELiteral (LInt 0)))))))))
-      (exps ((ESequence ())))) |}];
+            (size (Negative (Literal (Int 1))))
+            (init (Literal (Int 0)))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := print(\"asdf\")";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
-          (expression (ECall (func print) (args ((ELiteral (LString asdf))))))))))
-      (exps ((ESequence ())))) |}];
+          (expression (Call (func print) (args ((Literal (String asdf))))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := col[i]";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
-          (expression (ELvalue (LSubscript (LIdent col) (ELvalue (LIdent i)))))))))
-      (exps ((ESequence ())))) |}];
+          (expression (Lvalue (Subscript (Ident col) (Lvalue (Ident i)))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := col[i]=j";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            EBinary Equal
-            (ELvalue (LSubscript (LIdent col) (ELvalue (LIdent i))))
-            (ELvalue (LIdent j))))))))
-      (exps ((ESequence ())))) |}];
+            Binary Equal
+            (Lvalue (Subscript (Ident col) (Lvalue (Ident i))))
+            (Lvalue (Ident j))))))))
+      (exps ((Sequence ())))) |}];
   test_parser "var x := print(if col[i]=j then \" O\" else \" .\")";
   [%expect
     {|
-    (ELet
+    (Let
       (declarations ((
-        DVariable (
+        Variable (
           (ident x)
           (type_id ())
           (expression (
-            ECall
+            Call
             (func print)
             (args ((
-              EIf
+              If
               (cond (
-                EBinary Equal
-                (ELvalue (LSubscript (LIdent col) (ELvalue (LIdent i))))
-                (ELvalue (LIdent j))))
-              (then_ (ELiteral (LString " O")))
-              (else_ ((ELiteral (LString " .")))))))))))))
-      (exps ((ESequence ())))) |}]
+                Binary Equal
+                (Lvalue (Subscript (Ident col) (Lvalue (Ident i))))
+                (Lvalue (Ident j))))
+              (then_ (Literal (String " O")))
+              (else_ ((Literal (String " .")))))))))))))
+      (exps ((Sequence ())))) |}]
 ;;

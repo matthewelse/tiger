@@ -23,7 +23,7 @@ let parse str =
 ;;
 
 let test_parser str =
-  Expect_test_helpers_core.print_s ([%sexp_of: Tiger.Ast.expression] (parse str))
+  Expect_test_helpers_core.print_s ([%sexp_of: Tiger.Ast.Expression.t] (parse str))
 ;;
 
 let test_lexer str =

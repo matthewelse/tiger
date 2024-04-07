@@ -40,191 +40,190 @@ let%expect_test "can parse" =
   test_parser program;
   [%expect
     {|
-    (ELet
+    (Let
       (declarations (
-        (DVariable ((ident N) (type_id ()) (expression (ELiteral (LInt 8)))))
-        (DType (intArray (TArray int)))
-        (DVariable (
+        (Variable ((ident N) (type_id ()) (expression (Literal (Int 8)))))
+        (Type ((name intArray) (desc (Array int))))
+        (Variable (
           (ident row)
           (type_id ())
           (expression (
-            EArray
+            Array
             (element_type intArray)
-            (size (ELvalue  (LIdent N)))
-            (init (ELiteral (LInt   0)))))))
-        (DVariable (
+            (size (Lvalue  (Ident N)))
+            (init (Literal (Int   0)))))))
+        (Variable (
           (ident col)
           (type_id ())
           (expression (
-            EArray
+            Array
             (element_type intArray)
-            (size (ELvalue  (LIdent N)))
-            (init (ELiteral (LInt   0)))))))
-        (DVariable (
+            (size (Lvalue  (Ident N)))
+            (init (Literal (Int   0)))))))
+        (Variable (
           (ident diag1)
           (type_id ())
           (expression (
-            EArray
+            Array
             (element_type intArray)
             (size (
-              EBinary Minus
-              (EBinary Plus
-                (ELvalue (LIdent N))
-                (ELvalue (LIdent N)))
-              (ELiteral (LInt 1))))
-            (init (ELiteral (LInt 0)))))))
-        (DVariable (
+              Binary Minus
+              (Binary Plus
+                (Lvalue (Ident N))
+                (Lvalue (Ident N)))
+              (Literal (Int 1))))
+            (init (Literal (Int 0)))))))
+        (Variable (
           (ident diag2)
           (type_id ())
           (expression (
-            EArray
+            Array
             (element_type intArray)
             (size (
-              EBinary Minus
-              (EBinary Plus
-                (ELvalue (LIdent N))
-                (ELvalue (LIdent N)))
-              (ELiteral (LInt 1))))
-            (init (ELiteral (LInt 0)))))))
-        (DFunction (
+              Binary Minus
+              (Binary Plus
+                (Lvalue (Ident N))
+                (Lvalue (Ident N)))
+              (Literal (Int 1))))
+            (init (Literal (Int 0)))))))
+        (Function (
           (ident printboard)
           (args        ())
           (return_type ())
           (body (
-            ESequence (
-              (EFor
+            Sequence (
+              (For
                 (ident i)
-                (lo (ELiteral (LInt 0)))
+                (lo (Literal (Int 0)))
                 (hi (
-                  EBinary Minus
-                  (ELvalue  (LIdent N))
-                  (ELiteral (LInt   1))))
+                  Binary Minus
+                  (Lvalue  (Ident N))
+                  (Literal (Int   1))))
                 (body (
-                  ESequence (
-                    (EFor
+                  Sequence (
+                    (For
                       (ident j)
-                      (lo (ELiteral (LInt 0)))
+                      (lo (Literal (Int 0)))
                       (hi (
-                        EBinary Minus
-                        (ELvalue  (LIdent N))
-                        (ELiteral (LInt   1))))
+                        Binary Minus
+                        (Lvalue  (Ident N))
+                        (Literal (Int   1))))
                       (body (
-                        ECall
+                        Call
                         (func print)
                         (args ((
-                          EIf
+                          If
                           (cond (
-                            EBinary Equal
-                            (ELvalue (
-                              LSubscript (LIdent col) (ELvalue (LIdent i))))
-                            (ELvalue (LIdent j))))
-                          (then_ (ELiteral (LString " O")))
-                          (else_ ((ELiteral (LString " ."))))))))))
-                    (ECall (func print) (args ((ELiteral (LString "\\n")))))))))
-              (ECall (func print) (args ((ELiteral (LString "\\n"))))))))))
-        (DFunction (
+                            Binary Equal
+                            (Lvalue (Subscript (Ident col) (Lvalue (Ident i))))
+                            (Lvalue (Ident j))))
+                          (then_ (Literal (String " O")))
+                          (else_ ((Literal (String " ."))))))))))
+                    (Call (func print) (args ((Literal (String "\\n")))))))))
+              (Call (func print) (args ((Literal (String "\\n"))))))))))
+        (Function (
           (ident try)
           (args ((c int)))
           (return_type ())
           (body (
-            EIf
+            If
             (cond (
-              EBinary Equal
-              (ELvalue (LIdent c))
-              (ELvalue (LIdent N))))
-            (then_ (ECall (func printboard) (args ())))
+              Binary Equal
+              (Lvalue (Ident c))
+              (Lvalue (Ident N))))
+            (then_ (Call (func printboard) (args ())))
             (else_ ((
-              ESequence ((
-                EFor
+              Sequence ((
+                For
                 (ident r)
-                (lo (ELiteral (LInt 0)))
+                (lo (Literal (Int 0)))
                 (hi (
-                  EBinary Minus
-                  (ELvalue  (LIdent N))
-                  (ELiteral (LInt   1))))
+                  Binary Minus
+                  (Lvalue  (Ident N))
+                  (Literal (Int   1))))
                 (body (
-                  EIf
+                  If
                   (cond (
-                    EBinary And
-                    (EBinary And
-                      (EBinary Equal
-                        (ELvalue (LSubscript (LIdent row) (ELvalue (LIdent r))))
-                        (ELiteral (LInt 0)))
-                      (EBinary Equal
-                        (ELvalue (
-                          LSubscript
-                          (LIdent diag1)
-                          (EBinary Plus
-                            (ELvalue (LIdent r))
-                            (ELvalue (LIdent c)))))
-                        (ELiteral (LInt 0))))
-                    (EBinary Equal
-                      (ELvalue (
-                        LSubscript
-                        (LIdent diag2)
-                        (EBinary Minus
-                          (EBinary Plus
-                            (EBinary Minus
-                              (ELvalue (LIdent r))
-                              (ELvalue (LIdent c)))
-                            (ELvalue (LIdent N)))
-                          (ELiteral (LInt 1)))))
-                      (ELiteral (LInt 0)))))
+                    Binary And
+                    (Binary And
+                      (Binary Equal
+                        (Lvalue (Subscript (Ident row) (Lvalue (Ident r))))
+                        (Literal (Int 0)))
+                      (Binary Equal
+                        (Lvalue (
+                          Subscript
+                          (Ident diag1)
+                          (Binary Plus
+                            (Lvalue (Ident r))
+                            (Lvalue (Ident c)))))
+                        (Literal (Int 0))))
+                    (Binary Equal
+                      (Lvalue (
+                        Subscript
+                        (Ident diag2)
+                        (Binary Minus
+                          (Binary Plus
+                            (Binary Minus
+                              (Lvalue (Ident r))
+                              (Lvalue (Ident c)))
+                            (Lvalue (Ident N)))
+                          (Literal (Int 1)))))
+                      (Literal (Int 0)))))
                   (then_ (
-                    ESequence (
-                      (EAssign
-                        (LSubscript (LIdent row) (ELvalue (LIdent r)))
-                        (ELiteral (LInt 1)))
-                      (EAssign
-                        (LSubscript
-                          (LIdent diag1)
-                          (EBinary Plus
-                            (ELvalue (LIdent r))
-                            (ELvalue (LIdent c))))
-                        (ELiteral (LInt 1)))
-                      (EAssign
-                        (LSubscript
-                          (LIdent diag2)
-                          (EBinary Minus
-                            (EBinary Plus
-                              (EBinary Minus
-                                (ELvalue (LIdent r))
-                                (ELvalue (LIdent c)))
-                              (ELvalue (LIdent N)))
-                            (ELiteral (LInt 1))))
-                        (ELiteral (LInt 1)))
-                      (EAssign
-                        (LSubscript (LIdent col) (ELvalue (LIdent c)))
-                        (ELvalue (LIdent r)))
-                      (ECall
+                    Sequence (
+                      (Assign
+                        (Subscript (Ident row) (Lvalue (Ident r)))
+                        (Literal (Int 1)))
+                      (Assign
+                        (Subscript
+                          (Ident diag1)
+                          (Binary Plus
+                            (Lvalue (Ident r))
+                            (Lvalue (Ident c))))
+                        (Literal (Int 1)))
+                      (Assign
+                        (Subscript
+                          (Ident diag2)
+                          (Binary Minus
+                            (Binary Plus
+                              (Binary Minus
+                                (Lvalue (Ident r))
+                                (Lvalue (Ident c)))
+                              (Lvalue (Ident N)))
+                            (Literal (Int 1))))
+                        (Literal (Int 1)))
+                      (Assign
+                        (Subscript (Ident col) (Lvalue (Ident c)))
+                        (Lvalue (Ident r)))
+                      (Call
                         (func try)
                         (args ((
-                          EBinary Plus
-                          (ELvalue  (LIdent c))
-                          (ELiteral (LInt   1))))))
-                      (EAssign
-                        (LSubscript (LIdent row) (ELvalue (LIdent r)))
-                        (ELiteral (LInt 0)))
-                      (EAssign
-                        (LSubscript
-                          (LIdent diag1)
-                          (EBinary Plus
-                            (ELvalue (LIdent r))
-                            (ELvalue (LIdent c))))
-                        (ELiteral (LInt 0)))
-                      (EAssign
-                        (LSubscript
-                          (LIdent diag2)
-                          (EBinary Minus
-                            (EBinary Plus
-                              (EBinary Minus
-                                (ELvalue (LIdent r))
-                                (ELvalue (LIdent c)))
-                              (ELvalue (LIdent N)))
-                            (ELiteral (LInt 1))))
-                        (ELiteral (LInt 0))))))
+                          Binary Plus
+                          (Lvalue  (Ident c))
+                          (Literal (Int   1))))))
+                      (Assign
+                        (Subscript (Ident row) (Lvalue (Ident r)))
+                        (Literal (Int 0)))
+                      (Assign
+                        (Subscript
+                          (Ident diag1)
+                          (Binary Plus
+                            (Lvalue (Ident r))
+                            (Lvalue (Ident c))))
+                        (Literal (Int 0)))
+                      (Assign
+                        (Subscript
+                          (Ident diag2)
+                          (Binary Minus
+                            (Binary Plus
+                              (Binary Minus
+                                (Lvalue (Ident r))
+                                (Lvalue (Ident c)))
+                              (Lvalue (Ident N)))
+                            (Literal (Int 1))))
+                        (Literal (Int 0))))))
                   (else_ ()))))))))))))))
-      (exps ((ECall (func try) (args ((ELiteral (LInt 0)))))))) |}]
+      (exps ((Call (func try) (args ((Literal (Int 0)))))))) |}]
 ;;
 
 let%expect_test "execute" =

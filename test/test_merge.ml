@@ -62,204 +62,203 @@ let%expect_test "can parse" =
   test_parser program;
   [%expect
     {|
-    (ELet
+    (Let
       (declarations (
-        (DType (any (TRecord ((any int)))))
-        (DVariable (
+        (Type ((name any) (desc (Record ((any int))))))
+        (Variable (
           (ident buffer)
           (type_id ())
-          (expression (ECall (func getchar) (args ())))))
-        (DFunction (
+          (expression (Call (func getchar) (args ())))))
+        (Function (
           (ident readint)
           (args ((any any)))
           (return_type (int))
           (body (
-            ELet
+            Let
             (declarations (
-              (DVariable ((ident i) (type_id ()) (expression (ELiteral (LInt 0)))))
-              (DFunction (
+              (Variable ((ident i) (type_id ()) (expression (Literal (Int 0)))))
+              (Function (
                 (ident isdigit)
                 (args ((s string)))
                 (return_type (int))
                 (body (
-                  EBinary And
-                  (EBinary Ge
-                    (ECall (func ord) (args ((ELvalue (LIdent s)))))
-                    (ECall (func ord) (args ((ELiteral (LString 0))))))
-                  (EBinary Le
-                    (ECall (func ord) (args ((ELvalue (LIdent s)))))
-                    (ECall (func ord) (args ((ELiteral (LString 9))))))))))))
+                  Binary And
+                  (Binary Ge
+                    (Call (func ord) (args ((Lvalue (Ident s)))))
+                    (Call (func ord) (args ((Literal (String 0))))))
+                  (Binary Le
+                    (Call (func ord) (args ((Lvalue (Ident s)))))
+                    (Call (func ord) (args ((Literal (String 9))))))))))))
             (exps (
-              (EWhile
+              (While
                 (cond (
-                  EBinary Or
-                  (EBinary Equal
-                    (ELvalue  (LIdent  buffer))
-                    (ELiteral (LString " ")))
-                  (EBinary Equal
-                    (ELvalue  (LIdent  buffer))
-                    (ELiteral (LString "\\n")))))
-                (body (EAssign (LIdent buffer) (ECall (func getchar) (args ())))))
-              (EAssign
-                (LDot (LIdent any) any)
-                (ECall (func isdigit) (args ((ELvalue (LIdent buffer))))))
-              (EWhile
-                (cond (ECall (func isdigit) (args ((ELvalue (LIdent buffer))))))
+                  Binary Or
+                  (Binary Equal
+                    (Lvalue  (Ident  buffer))
+                    (Literal (String " ")))
+                  (Binary Equal
+                    (Lvalue  (Ident  buffer))
+                    (Literal (String "\\n")))))
+                (body (Assign (Ident buffer) (Call (func getchar) (args ())))))
+              (Assign
+                (Dot (Ident any) any)
+                (Call (func isdigit) (args ((Lvalue (Ident buffer))))))
+              (While
+                (cond (Call (func isdigit) (args ((Lvalue (Ident buffer))))))
                 (body (
-                  ESequence (
-                    (EAssign
-                      (LIdent i)
-                      (EBinary Minus
-                        (EBinary Plus
-                          (EBinary Times
-                            (ELvalue  (LIdent i))
-                            (ELiteral (LInt   10)))
-                          (ECall (func ord) (args ((ELvalue (LIdent buffer))))))
-                        (ECall (func ord) (args ((ELiteral (LString 0)))))))
-                    (EAssign (LIdent buffer) (ECall (func getchar) (args ())))))))
-              (ELvalue (LIdent i))))))))
-        (DType (
-          list (
-            TRecord (
+                  Sequence (
+                    (Assign
+                      (Ident i)
+                      (Binary Minus
+                        (Binary Plus
+                          (Binary Times
+                            (Lvalue  (Ident i))
+                            (Literal (Int   10)))
+                          (Call (func ord) (args ((Lvalue (Ident buffer))))))
+                        (Call (func ord) (args ((Literal (String 0)))))))
+                    (Assign (Ident buffer) (Call (func getchar) (args ())))))))
+              (Lvalue (Ident i))))))))
+        (Type (
+          (name list)
+          (desc (
+            Record (
               (first int)
-              (rest  list)))))
-        (DFunction (
+              (rest  list))))))
+        (Function (
           (ident readlist)
           (args ())
           (return_type (list))
           (body (
-            ELet
+            Let
             (declarations (
-              (DVariable (
+              (Variable (
                 (ident any)
                 (type_id ())
-                (expression (ERecord any ((any (ELiteral (LInt 0))))))))
-              (DVariable (
+                (expression (Record any ((any (Literal (Int 0))))))))
+              (Variable (
                 (ident i)
                 (type_id ())
-                (expression (ECall (func reading) (args ((ELvalue (LIdent any))))))))))
+                (expression (Call (func reading) (args ((Lvalue (Ident any))))))))))
             (exps ((
-              EIf
-              (cond (ELvalue (LDot (LIdent any) any)))
+              If
+              (cond (Lvalue (Dot (Ident any) any)))
               (then_ (
-                ERecord list (
-                  (first (ELvalue (LIdent i)))
-                  (rest (ECall (func readlist) (args ()))))))
+                Record list (
+                  (first (Lvalue (Ident i)))
+                  (rest (Call (func readlist) (args ()))))))
               (else_ ((
-                ESequence (
-                  (EAssign (LIdent buffer) (ECall (func getchar) (args ()))) ENil)))))))))))
-        (DFunction (
+                Sequence (
+                  (Assign (Ident buffer) (Call (func getchar) (args ()))) Nil)))))))))))
+        (Function (
           (ident merge)
           (args (
             (a list)
             (b list)))
           (return_type (list))
           (body (
-            EIf
-            (cond (EBinary Equal (ELvalue (LIdent a)) ENil))
-            (then_ (ELvalue (LIdent b)))
+            If
+            (cond (Binary Equal (Lvalue (Ident a)) Nil))
+            (then_ (Lvalue (Ident b)))
             (else_ ((
-              EIf
-              (cond (EBinary Equal (ELvalue (LIdent b)) ENil))
-              (then_ (ELvalue (LIdent a)))
+              If
+              (cond (Binary Equal (Lvalue (Ident b)) Nil))
+              (then_ (Lvalue (Ident a)))
               (else_ ((
-                EIf
+                If
                 (cond (
-                  EBinary Lt
-                  (ELvalue (LDot (LIdent a) first))
-                  (ELvalue (LDot (LIdent b) first))))
+                  Binary Lt
+                  (Lvalue (Dot (Ident a) first))
+                  (Lvalue (Dot (Ident b) first))))
                 (then_ (
-                  ERecord list (
-                    (first (ELvalue (LDot (LIdent a) first)))
+                  Record list (
+                    (first (Lvalue (Dot (Ident a) first)))
                     (rest (
-                      ECall
+                      Call
                       (func merge)
-                      (args (
-                        (ELvalue (LDot (LIdent a) rest)) (ELvalue (LIdent b)))))))))
+                      (args ((Lvalue (Dot (Ident a) rest)) (Lvalue (Ident b)))))))))
                 (else_ ((
-                  ERecord list (
-                    (first (ELvalue (LDot (LIdent b) first)))
+                  Record list (
+                    (first (Lvalue (Dot (Ident b) first)))
                     (rest (
-                      ECall
+                      Call
                       (func merge)
-                      (args (
-                        (ELvalue (LIdent a)) (ELvalue (LDot (LIdent b) rest))))))))))))))))))))
-        (DFunction (
+                      (args ((Lvalue (Ident a)) (Lvalue (Dot (Ident b) rest))))))))))))))))))))
+        (Function (
           (ident printint)
           (args ((i int)))
           (return_type ())
           (body (
-            ELet
+            Let
             (declarations ((
-              DFunction (
+              Function (
                 (ident f)
                 (args ((i int)))
                 (return_type ())
                 (body (
-                  EIf
+                  If
                   (cond (
-                    EBinary Gt
-                    (ELvalue  (LIdent i))
-                    (ELiteral (LInt   0))))
+                    Binary Gt
+                    (Lvalue  (Ident i))
+                    (Literal (Int   0))))
                   (then_ (
-                    ESequence (
-                      (ECall
+                    Sequence (
+                      (Call
                         (func f)
                         (args ((
-                          EBinary Divide
-                          (ELvalue  (LIdent i))
-                          (ELiteral (LInt   10))))))
-                      (ECall
+                          Binary Divide
+                          (Lvalue  (Ident i))
+                          (Literal (Int   10))))))
+                      (Call
                         (func putchar)
                         (args ((
-                          EBinary Plus
-                          (EBinary Minus
-                            (ELvalue (LIdent i))
-                            (EBinary Times
-                              (EBinary Divide
-                                (ELvalue  (LIdent i))
-                                (ELiteral (LInt   10)))
-                              (ELiteral (LInt 10))))
-                          (ECall (func ord) (args ((ELiteral (LString 0))))))))))))
+                          Binary Plus
+                          (Binary Minus
+                            (Lvalue (Ident i))
+                            (Binary Times
+                              (Binary Divide
+                                (Lvalue  (Ident i))
+                                (Literal (Int   10)))
+                              (Literal (Int 10))))
+                          (Call (func ord) (args ((Literal (String 0))))))))))))
                   (else_ ())))))))
             (exps ((
-              EIf
+              If
               (cond (
-                EBinary Lt
-                (ELvalue  (LIdent i))
-                (ELiteral (LInt   0))))
+                Binary Lt
+                (Lvalue  (Ident i))
+                (Literal (Int   0))))
               (then_ (
-                ESequence (
-                  (ECall (func print) (args ((ELiteral (LString -)))))
-                  (ECall (func f) (args ((ENegative (ELvalue (LIdent i)))))))))
+                Sequence (
+                  (Call (func print) (args ((Literal (String -)))))
+                  (Call (func f) (args ((Negative (Lvalue (Ident i)))))))))
               (else_ ((
-                EIf
+                If
                 (cond (
-                  EBinary Gt
-                  (ELvalue  (LIdent i))
-                  (ELiteral (LInt   0))))
-                (then_ (ECall (func f) (args ((ELvalue (LIdent i))))))
-                (else_ ((ECall (func print) (args ((ELiteral (LString 0)))))))))))))))))
-        (DFunction (
+                  Binary Gt
+                  (Lvalue  (Ident i))
+                  (Literal (Int   0))))
+                (then_ (Call (func f) (args ((Lvalue (Ident i))))))
+                (else_ ((Call (func print) (args ((Literal (String 0)))))))))))))))))
+        (Function (
           (ident printlist)
           (args ((l list)))
           (return_type ())
           (body (
-            EIf
-            (cond (EBinary Equal (ELvalue (LIdent l)) ENil))
-            (then_ (ESequence ()))
+            If
+            (cond (Binary Equal (Lvalue (Ident l)) Nil))
+            (then_ (Sequence ()))
             (else_ ((
-              ESequence (
-                (ECall (func printint) (args ((ELvalue (LDot (LIdent l) first)))))
-                (ECall (func print) (args ((ELiteral (LString " ")))))
-                (ECall (func printlist) (args ((ELvalue (LDot (LIdent l) rest)))))))))))))))
+              Sequence (
+                (Call (func printint) (args ((Lvalue (Dot (Ident l) first)))))
+                (Call (func print) (args ((Literal (String " ")))))
+                (Call (func printlist) (args ((Lvalue (Dot (Ident l) rest)))))))))))))))
       (exps ((
-        ECall
+        Call
         (func printlist)
         (args ((
-          ECall
+          Call
           (func merge)
           (args (
-            (ECall (func readlist) (args ()))
-            (ECall (func readlist) (args ()))))))))))) |}]
+            (Call (func readlist) (args ()))
+            (Call (func readlist) (args ()))))))))))) |}]
 ;;
