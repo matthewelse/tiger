@@ -17,7 +17,7 @@ type t =
   | Unit
   | Name of
       { name : Type_id.t
-      ; mutable type_ : t option
+      ; mutable type_ : (t[@sexp.opaque]) option
       }
 [@@deriving equal, typed_variants, sexp_of]
 
@@ -41,13 +41,16 @@ let rec require_no_illegal_cycles_exn t reached =
 let rec resolve t (tenv : (Type_id.t, t) Scoped_table.t) =
   match t with
   | Name named ->
-    (match Scoped_table.find tenv named.name with
-     | Some t' ->
-       named.type_ <- Some t';
-       require_no_illegal_cycles_exn t Type_id.Set.empty
-     | None -> failwith "unresolved type")
+    if Option.is_none named.type_
+    then (
+      match Scoped_table.find tenv named.name with
+      | Some t' ->
+        named.type_ <- Some t';
+        require_no_illegal_cycles_exn t Type_id.Set.empty
+      | None -> failwith "unresolved type")
   | Array { element_type; _ } -> resolve element_type tenv
-  | Record { fields; _ } -> List.iter fields ~f:(fun (_, t) -> resolve t tenv)
+  | Record { fields; _ } ->
+    List.iter fields ~f:(fun (_, field_typ) -> resolve field_typ tenv)
   | Int | String | Nil | Unit -> ()
 ;;
 
@@ -66,13 +69,16 @@ let rec require_exn : 'k. t -> 'k Typed_variant.t -> 'k =
             %{Typed_variant.name typ}"])
 ;;
 
-let rec require_match_exn t1 t2 =
+let rec require_match_exn t1 t2 visited =
   match t1, t2 with
-  | Name { type_ = Some t1; _ }, t2 | t1, Name { type_ = Some t2; _ } ->
-    require_match_exn t1 t2
+  | Name { type_ = Some t1; name }, t2 | t1, Name { type_ = Some t2; name } ->
+    let visited = Set.add visited name in
+    require_match_exn t1 t2 visited
   | Record _, Nil | Nil, Record _ -> ()
   | _ -> if equal t1 t2 then () else raise_s [%message "Type mismatch" (t1 : t) (t2 : t)]
 ;;
+
+let require_match_exn t1 t2 = require_match_exn t1 t2 Type_id.Set.empty
 
 module Function = struct
   type typ = t

@@ -1,4 +1,7 @@
 (executable
  (public_name tiger)
  (name main)
- (libraries tiger))
+ (libraries core expect_test_helpers_core menhirLib tiger)
+ (modes native byte)
+ (preprocess
+  (pps ppx_jane)))

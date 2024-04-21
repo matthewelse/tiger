@@ -3,3 +3,5 @@
 (name tiger)
 
 (using menhir 3.0)
+
+(map_workspace_root false)

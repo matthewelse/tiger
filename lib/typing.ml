@@ -175,7 +175,7 @@ and expression
                [%string "Unexpected field name in record: %{field_expr_name#Field_id}"])
      with
      | Unequal_lengths -> failwith "asdf"
-     | Ok _ -> type_)
+     | Ok () -> type_)
   | Array { element_type; size = _; init } ->
     let init_type = expression venv tenv init in
     let size_type = expression venv tenv init in
