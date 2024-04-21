@@ -46,3 +46,9 @@ let test_interpreter str =
   let value = Tiger.Interpret.run expr in
   print_s [%sexp (value : Tiger.Interpret.Value.t)]
 ;;
+
+let test_typing str =
+  let expr = parse str in
+  let value = Tiger.Typing.For_testing.type_of_expression expr in
+  print_s [%sexp (value : Tiger.Type.t)]
+;;

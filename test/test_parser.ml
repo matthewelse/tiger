@@ -12,8 +12,11 @@ let%expect_test "asdf" =
 let test_parser s = test_parser [%string "let %{s} in () end"]
 
 let%expect_test _ =
-  (* test_parser "type a = b"; *)
-  [%expect {||}];
+  test_parser "type a = b";
+  [%expect {|
+    (Let
+      (declarations ((Type ((name a) (desc (Alias b))))))
+      (exps ((Sequence ())))) |}];
   test_parser "type a = { x : int }";
   [%expect
     {|
@@ -34,7 +37,7 @@ let%expect_test _ =
     (Let
       (declarations ((
         Function (
-          (ident treeLeaves) (args ((t tree))) (return_type ()) (body Nil)))))
+          (ident treeLeaves) (formal_args ((t tree))) (return_type ()) (body Nil)))))
       (exps ((Sequence ())))) |}];
   test_parser "function treeLeaves(t : tree) : asdf = nil";
   [%expect
@@ -42,7 +45,10 @@ let%expect_test _ =
     (Let
       (declarations ((
         Function (
-          (ident treeLeaves) (args ((t tree))) (return_type (asdf)) (body Nil)))))
+          (ident treeLeaves)
+          (formal_args ((t tree)))
+          (return_type (asdf))
+          (body Nil)))))
       (exps ((Sequence ())))) |}];
   test_parser "var x := 1 + 2 * 3";
   [%expect

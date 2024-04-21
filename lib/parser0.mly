@@ -82,12 +82,12 @@ let variable_declaration ==
 (* Function declarations *)
 
 let function_declaration ==
-  | "function"; ~ = ident; "("; args = func_params; ")"; "=";
+  | "function"; ~ = ident; "("; formal_args = func_params; ")"; "=";
     body = expression;
-    { { Function_declaration.ident; args; return_type = None; body } }
-  | "function"; ~ = ident; "("; args = func_params; ")"; ":"; return_type = type_id; "=";
+    { { Function_declaration.ident; formal_args; return_type = None; body } }
+  | "function"; ~ = ident; "("; formal_args = func_params; ")"; ":"; return_type = type_id; "=";
     body = expression;
-    { { Function_declaration.ident; args; return_type = Some return_type; body } }
+    { { Function_declaration.ident; formal_args; return_type = Some return_type; body } }
 
 
 let func_params == separated_list(",", func_param)

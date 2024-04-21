@@ -26,7 +26,7 @@ let
 
   function readlist() : list =
     let var any := any{any=0}
-        var i := reading(any)
+        var i := readint(any)
     in
       if any.any then
         list { first = i, rest = readlist() }
@@ -42,7 +42,7 @@ let
       list { first = b.first, rest = merge(a, b.rest) }
   
   function printint(i : int) =
-    let function f(i : int) = if i > 0 then (f(i / 10); putchar(i - i / 10 * 10 + ord("0")))
+    let function f(i : int) = if i > 0 then (f(i / 10); print(chr(i - i / 10 * 10 + ord("0"))))
     in
       if i < 0 then (print("-"); f(-i))
       else if i > 0 then f(i)
@@ -71,7 +71,7 @@ let%expect_test "can parse" =
           (expression (Call (func getchar) (args ())))))
         (Function (
           (ident readint)
-          (args ((any any)))
+          (formal_args ((any any)))
           (return_type (int))
           (body (
             Let
@@ -79,7 +79,7 @@ let%expect_test "can parse" =
               (Variable ((ident i) (type_id ()) (expression (Literal (Int 0)))))
               (Function (
                 (ident isdigit)
-                (args ((s string)))
+                (formal_args ((s string)))
                 (return_type (int))
                 (body (
                   Binary And
@@ -126,7 +126,7 @@ let%expect_test "can parse" =
               (rest  list))))))
         (Function (
           (ident readlist)
-          (args ())
+          (formal_args ())
           (return_type (list))
           (body (
             Let
@@ -138,7 +138,7 @@ let%expect_test "can parse" =
               (Variable (
                 (ident i)
                 (type_id ())
-                (expression (Call (func reading) (args ((Lvalue (Ident any))))))))))
+                (expression (Call (func readint) (args ((Lvalue (Ident any))))))))))
             (exps ((
               If
               (cond (Lvalue (Dot (Ident any) any)))
@@ -151,7 +151,7 @@ let%expect_test "can parse" =
                   (Assign (Ident buffer) (Call (func getchar) (args ()))) Nil)))))))))))
         (Function (
           (ident merge)
-          (args (
+          (formal_args (
             (a list)
             (b list)))
           (return_type (list))
@@ -185,14 +185,14 @@ let%expect_test "can parse" =
                       (args ((Lvalue (Ident a)) (Lvalue (Dot (Ident b) rest))))))))))))))))))))
         (Function (
           (ident printint)
-          (args ((i int)))
+          (formal_args ((i int)))
           (return_type ())
           (body (
             Let
             (declarations ((
               Function (
                 (ident f)
-                (args ((i int)))
+                (formal_args ((i int)))
                 (return_type ())
                 (body (
                   If
@@ -209,17 +209,20 @@ let%expect_test "can parse" =
                           (Lvalue  (Ident i))
                           (Literal (Int   10))))))
                       (Call
-                        (func putchar)
+                        (func print)
                         (args ((
-                          Binary Plus
-                          (Binary Minus
-                            (Lvalue (Ident i))
-                            (Binary Times
-                              (Binary Divide
-                                (Lvalue  (Ident i))
-                                (Literal (Int   10)))
-                              (Literal (Int 10))))
-                          (Call (func ord) (args ((Literal (String 0))))))))))))
+                          Call
+                          (func chr)
+                          (args ((
+                            Binary Plus
+                            (Binary Minus
+                              (Lvalue (Ident i))
+                              (Binary Times
+                                (Binary Divide
+                                  (Lvalue  (Ident i))
+                                  (Literal (Int   10)))
+                                (Literal (Int 10))))
+                            (Call (func ord) (args ((Literal (String 0)))))))))))))))
                   (else_ ())))))))
             (exps ((
               If
@@ -241,7 +244,7 @@ let%expect_test "can parse" =
                 (else_ ((Call (func print) (args ((Literal (String 0)))))))))))))))))
         (Function (
           (ident printlist)
-          (args ((l list)))
+          (formal_args ((l list)))
           (return_type ())
           (body (
             If
@@ -261,4 +264,9 @@ let%expect_test "can parse" =
           (args (
             (Call (func readlist) (args ()))
             (Call (func readlist) (args ()))))))))))) |}]
+;;
+
+let%expect_test "test typing" =
+  Helpers.test_typing program;
+  [%expect {| Unit |}]
 ;;

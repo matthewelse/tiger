@@ -88,7 +88,7 @@ let%expect_test "can parse" =
             (init (Literal (Int 0)))))))
         (Function (
           (ident printboard)
-          (args        ())
+          (formal_args ())
           (return_type ())
           (body (
             Sequence (
@@ -123,7 +123,7 @@ let%expect_test "can parse" =
               (Call (func print) (args ((Literal (String "\\n"))))))))))
         (Function (
           (ident try)
-          (args ((c int)))
+          (formal_args ((c int)))
           (return_type ())
           (body (
             If
@@ -1060,3 +1060,6 @@ let%expect_test "execute" =
 
     Unit |}]
 ;;
+
+let%expect_test "test typing" = Helpers.test_typing program;
+  [%expect {| Unit |}]

@@ -10,8 +10,8 @@ module Value = struct
     | Unit
     | Int of int
     | String of string
-    | Record of t ref Ast.Field_id.Map.t
-    | Function of Ast.Ident.t list * Ast.Expression.t
+    | Record of t ref Field_id.Map.t
+    | Function of Ident.t list * Ast.Expression.t
     | Array of t array
     | Native of Native_function.t
   [@@deriving sexp_of]
@@ -42,7 +42,7 @@ module Value = struct
 end
 
 module Env = struct
-  type t = Value.t ref Ast.Ident.Map.t
+  type t = Value.t ref Ident.Map.t
 end
 
 let escapeworthy_map = [ '\n', 'n'; '\t', 't'; '"', '"' ]
@@ -65,11 +65,11 @@ let rec interpret (env : Env.t) (expr : Ast.Expression.t) : Value.t =
           | Variable { ident; type_id = _; expression } ->
             let value = interpret env expression in
             Map.set env ~key:ident ~data:(ref value)
-          | Function { ident; args; return_type = _; body } ->
+          | Function { ident; formal_args; return_type = _; body } ->
             Map.set
               env
               ~key:ident
-              ~data:(ref (Value.Function (List.map ~f:fst args, body))))
+              ~data:(ref (Value.Function (List.map ~f:fst formal_args, body))))
         declarations
     in
     List.fold exps ~init:Value.Unit ~f:(fun _ exp -> interpret env exp)
@@ -107,7 +107,7 @@ let rec interpret (env : Env.t) (expr : Ast.Expression.t) : Value.t =
   | Record (_, fields) ->
     let map =
       List.map fields ~f:(fun (name, expr) -> name, ref (interpret env expr))
-      |> Ast.Field_id.Map.of_alist_exn
+      |> Field_id.Map.of_alist_exn
     in
     Record map
   | Array { element_type = _; size; init } ->
@@ -189,7 +189,7 @@ and lvalue env (l : _ Ast.Lvalue.t) : (unit -> Value.t) * (Value.t -> unit) =
 ;;
 
 let run expr =
-  let ident = Ast.Ident.of_string in
+  let ident = Ident.of_string in
   let defaults = [ ident "print", ref (Value.Native Print) ] in
-  interpret (Ast.Ident.Map.of_alist_exn defaults) expr
+  interpret (Ident.Map.of_alist_exn defaults) expr
 ;;
