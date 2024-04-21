@@ -80,6 +80,12 @@ let rec declarations
               (Option.value_exn ~message:[%string "Unknown type %{type_id#Type_id}"]
                @@ Scoped_table.find tenv type_id)
         in
+        (match expression_type, expected_type with
+         | Nil, Some must_be_record ->
+           let _ = Type.require_exn must_be_record Record in
+           ()
+         | Nil, _ -> failwith "Nil values must be constrained by a type annotation."
+         | _ -> ());
         (match expected_type with
          | None -> ()
          | Some expected_type -> Type.require_match_exn expected_type expression_type);
@@ -144,7 +150,6 @@ and expression
     Type.require_match_exn l r;
     Int
   | Binary (_op, l, r) ->
-    (* TODO: other types supported by binary operators *)
     let () = Type.require_exn (expression venv tenv l) Int in
     let () = Type.require_exn (expression venv tenv r) Int in
     Int

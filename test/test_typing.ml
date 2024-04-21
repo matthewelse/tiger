@@ -6,7 +6,7 @@ let test_typing s = test_typing [%string "let %{s} in () end"]
 let%expect_test _ =
   test_typing "type a = { x : int }";
   [%expect {| Unit |}];
-  test_typing "type a = { x : int }   var x := nil";
+  test_typing "type a = { x : int }   var x : a := nil";
   [%expect {| Unit |}];
   test_typing
     "type tree = int type asdf = { x : int } function treeLeaves(t : tree) : asdf = nil";
